@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="fir_filter_top_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="fir_filter_pkg" />
+            <top_module name="fir_filter_top" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="4296001fs"></ZoomEndTime>
+      <Cursor1Time time="1832000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="282"></NameColumnWidth>
+      <ValueColumnWidth column_width="129"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="47" />
+   <wvobject fp_name="/fir_filter_top/fir_data_in" type="array">
+      <obj_property name="ElementShortName">fir_data_in[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fir_data_in[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/fir_data_out" type="array">
+      <obj_property name="ElementShortName">fir_data_out[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fir_data_out[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/rst_n" type="logic">
+      <obj_property name="ElementShortName">rst_n</obj_property>
+      <obj_property name="ObjectShortName">rst_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/w_LFSR_Done" type="logic">
+      <obj_property name="ElementShortName">w_LFSR_Done</obj_property>
+      <obj_property name="ObjectShortName">w_LFSR_Done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/i_Enable" type="logic">
+      <obj_property name="ElementShortName">i_Enable</obj_property>
+      <obj_property name="ObjectShortName">i_Enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/i_Seed_DV" type="logic">
+      <obj_property name="ElementShortName">i_Seed_DV</obj_property>
+      <obj_property name="ObjectShortName">i_Seed_DV</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/i_Seed_Data" type="array">
+      <obj_property name="ElementShortName">i_Seed_Data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_Seed_Data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/seed_counter" type="array">
+      <obj_property name="ElementShortName">seed_counter[15:0]</obj_property>
+      <obj_property name="ObjectShortName">seed_counter[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/reset_counter" type="array">
+      <obj_property name="ElementShortName">reset_counter[11:0]</obj_property>
+      <obj_property name="ObjectShortName">reset_counter[11:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/FPGA_CLK" type="logic">
+      <obj_property name="ElementShortName">FPGA_CLK</obj_property>
+      <obj_property name="ObjectShortName">FPGA_CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/ADC_CLK" type="logic">
+      <obj_property name="ElementShortName">ADC_CLK</obj_property>
+      <obj_property name="ObjectShortName">ADC_CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/DAC_CLK" type="logic">
+      <obj_property name="ElementShortName">DAC_CLK</obj_property>
+      <obj_property name="ObjectShortName">DAC_CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/stop_reset_timer" type="logic">
+      <obj_property name="ElementShortName">stop_reset_timer</obj_property>
+      <obj_property name="ObjectShortName">stop_reset_timer</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/rst_n" type="logic">
+      <obj_property name="ElementShortName">rst_n</obj_property>
+      <obj_property name="ObjectShortName">rst_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_FPGA_CLK_P" type="logic">
+      <obj_property name="ElementShortName">INT_FPGA_CLK_P</obj_property>
+      <obj_property name="ObjectShortName">INT_FPGA_CLK_P</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_FPGA_CLK_N" type="logic">
+      <obj_property name="ElementShortName">INT_FPGA_CLK_N</obj_property>
+      <obj_property name="ObjectShortName">INT_FPGA_CLK_N</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_ADC_CLK_P" type="logic">
+      <obj_property name="ElementShortName">INT_ADC_CLK_P</obj_property>
+      <obj_property name="ObjectShortName">INT_ADC_CLK_P</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_ADC_CLK_N" type="logic">
+      <obj_property name="ElementShortName">INT_ADC_CLK_N</obj_property>
+      <obj_property name="ObjectShortName">INT_ADC_CLK_N</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_DAC_CLK_P" type="logic">
+      <obj_property name="ElementShortName">INT_DAC_CLK_P</obj_property>
+      <obj_property name="ObjectShortName">INT_DAC_CLK_P</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/INT_DAC_CLK_N" type="logic">
+      <obj_property name="ElementShortName">INT_DAC_CLK_N</obj_property>
+      <obj_property name="ObjectShortName">INT_DAC_CLK_N</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_DataArray_Q" type="array">
+      <obj_property name="ElementShortName">LFSR_DataArray_Q[3:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">LFSR_DataArray_Q[3:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/SIM_MODE" type="array">
+      <obj_property name="ElementShortName">SIM_MODE[1:4]</obj_property>
+      <obj_property name="ObjectShortName">SIM_MODE[1:4]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/g_Num_Bits" type="other">
+      <obj_property name="ElementShortName">g_Num_Bits</obj_property>
+      <obj_property name="ObjectShortName">g_Num_Bits</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/c_NUM_BITS" type="other">
+      <obj_property name="ElementShortName">c_NUM_BITS</obj_property>
+      <obj_property name="ObjectShortName">c_NUM_BITS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/c_SEED_COUNTER_BITS" type="other">
+      <obj_property name="ElementShortName">c_SEED_COUNTER_BITS</obj_property>
+      <obj_property name="ObjectShortName">c_SEED_COUNTER_BITS</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/c_CLK_PERIOD" type="other">
+      <obj_property name="ElementShortName">c_CLK_PERIOD</obj_property>
+      <obj_property name="ObjectShortName">c_CLK_PERIOD</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider146">
+      <obj_property name="label">LFSR</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/g_Num_Bits" type="other">
+      <obj_property name="ElementShortName">g_Num_Bits</obj_property>
+      <obj_property name="ObjectShortName">g_Num_Bits</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/i_Clk" type="logic">
+      <obj_property name="ElementShortName">i_Clk</obj_property>
+      <obj_property name="ObjectShortName">i_Clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/i_Enable" type="logic">
+      <obj_property name="ElementShortName">i_Enable</obj_property>
+      <obj_property name="ObjectShortName">i_Enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/i_Seed_DV" type="logic">
+      <obj_property name="ElementShortName">i_Seed_DV</obj_property>
+      <obj_property name="ObjectShortName">i_Seed_DV</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/i_Seed_Data" type="array">
+      <obj_property name="ElementShortName">i_Seed_Data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_Seed_Data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/o_LFSR_Data" type="array">
+      <obj_property name="ElementShortName">o_LFSR_Data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">o_LFSR_Data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/o_LFSR_Done" type="logic">
+      <obj_property name="ElementShortName">o_LFSR_Done</obj_property>
+      <obj_property name="ObjectShortName">o_LFSR_Done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/r_LFSR" type="array">
+      <obj_property name="ElementShortName">r_LFSR[16:1]</obj_property>
+      <obj_property name="ObjectShortName">r_LFSR[16:1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/LFSR_1/w_XNOR" type="logic">
+      <obj_property name="ElementShortName">w_XNOR</obj_property>
+      <obj_property name="ObjectShortName">w_XNOR</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider139">
+      <obj_property name="label">FIR_FILTER</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/i_coeff_0" type="array">
+      <obj_property name="ElementShortName">i_coeff_0[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_coeff_0[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/i_coeff_1" type="array">
+      <obj_property name="ElementShortName">i_coeff_1[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_coeff_1[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/i_coeff_2" type="array">
+      <obj_property name="ElementShortName">i_coeff_2[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_coeff_2[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/i_coeff_3" type="array">
+      <obj_property name="ElementShortName">i_coeff_3[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_coeff_3[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/o_data" type="array">
+      <obj_property name="ElementShortName">o_data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">o_data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/p_data" type="array">
+      <obj_property name="ElementShortName">p_data[0:3][15:0]</obj_property>
+      <obj_property name="ObjectShortName">p_data[0:3][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/r_add_st0" type="array">
+      <obj_property name="ElementShortName">r_add_st0[0:1][32:0]</obj_property>
+      <obj_property name="ObjectShortName">r_add_st0[0:1][32:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/r_add_st1" type="array">
+      <obj_property name="ElementShortName">r_add_st1[33:0]</obj_property>
+      <obj_property name="ObjectShortName">r_add_st1[33:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/r_coeff" type="array">
+      <obj_property name="ElementShortName">r_coeff[0:3][15:0]</obj_property>
+      <obj_property name="ObjectShortName">r_coeff[0:3][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/fir_filter_top/U_FIR_FILTER/r_mult" type="array">
+      <obj_property name="ElementShortName">r_mult[0:3][31:0]</obj_property>
+      <obj_property name="ObjectShortName">r_mult[0:3][31:0]</obj_property>
+   </wvobject>
+</wave_config>
