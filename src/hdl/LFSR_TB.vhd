@@ -48,15 +48,21 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL LFSR_Data_Q : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
   SIGNAL w_LFSR_Done : STD_LOGIC;
   SIGNAL i_Enable : STD_LOGIC;
+
+  -- seed related
   SIGNAL i_Seed_DV : STD_LOGIC;
   SIGNAL i_Seed_Data : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
   SIGNAL seed_counter : STD_LOGIC_VECTOR(c_SEED_COUNTER_BITS - 1 DOWNTO 0) := (OTHERS => '0');
+
+  --reset 
+  SIGNAL rst_n : STD_LOGIC := '0';
   SIGNAL reset_counter : STD_LOGIC_VECTOR(11 DOWNTO 0) := (OTHERS => '0');
 
-  SIGNAL FPGA_CLK : STD_LOGIC := '0';
+  -- clk
+  SIGNAL FPGA_CLK : STD_LOGIC;
   SIGNAL ADC_CLK : STD_LOGIC;
   SIGNAL DAC_CLK : STD_LOGIC;
-  SIGNAL rst_n : STD_LOGIC := '0';
+
   SIGNAL stop_reset_timer : STD_LOGIC;
 
   SIGNAL INT_FPGA_CLK_P : STD_LOGIC := '0';
@@ -69,48 +75,60 @@ ARCHITECTURE behave OF LFSR_TB IS
 
   SIGNAL MULT : MULT_TYPE;
   SIGNAL ADD : ADD_TYPE;
-
-  -- ATTRIBUTE syn_multstyle : STRING;
-  -- ATTRIBUTE syn_multstyle OF MULT : SIGNAL IS "logic";
 BEGIN
   i_Seed_Data <= x"DEAD";
 
+
   -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  adc_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
+
+  adc_ibuf : IBUFGDS
+  GENERIC MAP (
     DIFF_TERM => FALSE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
+    IBUF_LOW_PWR =>  FALSE)
+
+  PORT MAP (
     O => adc_clk,
     I => INT_ADC_CLK_P,
     IB => INT_ADC_CLK_N
   );
-  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  dac_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
-    DIFF_TERM => FALSE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
-    O => dac_clk,
-    I => INT_DAC_CLK_P,
-    IB => INT_DAC_CLK_N
-  );
-  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  fpga_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
-    DIFF_TERM => FALSE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
-    O => fpga_clk,
-    I => INT_FPGA_CLK_P,
-    IB => INT_FPGA_CLK_N
-  );
+
+
+
+  -- adc_clk_ibug : unisim.vcomponents.IBUFDS
+  -- GENERIC MAP(
+  --   DIFF_TERM => TRUE,
+  --   DQS_BIAS => "FALSE",
+  --   IOSTANDARD => "DEFAULT"
+  -- )
+  -- PORT MAP(
+  --   O => adc_clk,
+  --   I => ADC_CLK_P,
+  --   IB => ADC_CLK_N
+  -- );
+  --  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
+  --  dac_clk_ibug : unisim.vcomponents.IBUFDS
+  --  GENERIC MAP(
+  --    DIFF_TERM => TRUE,
+  --    DQS_BIAS => "FALSE",
+  --    IOSTANDARD => "DEFAULT"
+  --  )
+  --  PORT MAP(
+  --    O => dac_clk,
+  --    I  => DAC_CLK_P,
+  --    IB => DAC_CLK_N
+  --  );
+  --  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
+  --  fpga_clk_ibug : unisim.vcomponents.IBUFDS
+  --  GENERIC MAP(
+  --    DIFF_TERM => TRUE,
+  --    DQS_BIAS => "FALSE",
+  --    IOSTANDARD => "DEFAULT"
+  --  )
+  --  PORT MAP(
+  --    O => fpga_clk,
+  --    I =>  FPGA_CLK_P,
+  --    IB => FPGA_CLK_N
+  --  );
 
 
     INT_FPGA_CLK_P <= NOT INT_FPGA_CLK_P AFTER c_CLK_PERIOD/2;
@@ -186,19 +204,4 @@ BEGIN
     -- filtered data 
     o_data => fir_data_out
   );
-  -- FIR_1 : PROCESS (adc_clk) BEGIN
-  --   IF adc_clk'event AND adc_clk = '1' THEN
-  --     LFSR_Data_Q <= fir_data_in;
-  --     LFSR_DataArray_Q <= LFSR_DataArray_Q(NUM_OF_TAPS - 2 DOWNTO 0) & LFSR_Data_Q;
-  --     FOR I IN NUM_OF_TAPS DOWNTO 0 LOOP
-  --       MULT(I) <= LFSR_DataArray_Q(N - 1) * C_FIR_COEFS(NUM_OF_TAPS - I);
-  --       IF I = 0 THEN
-  --         ADD(I) <= ZERO + MULT(0);
-  --       ELSE
-  --         ADD(I) <= MULT(I) + ADD(I - 1);
-  --       END IF;
-  --     END LOOP;
-  --     DOUT <= ADD(59);
-  --   END IF;
-  -- END PROCESS FIR_1;
 END ARCHITECTURE behave;

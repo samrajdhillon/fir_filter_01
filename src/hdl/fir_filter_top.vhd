@@ -17,12 +17,15 @@ ENTITY fir_filter_top IS
     g_Num_Bits : INTEGER := 16
   );
   PORT (
-    FPGA_CLK_P : IN STD_LOGIC;
-    FPGA_CLK_N : IN STD_LOGIC;
+    --    FPGA_CLK_P : IN STD_LOGIC;
+    --    FPGA_CLK_N : IN STD_LOGIC;
     ADC_CLK_P : IN STD_LOGIC;
     ADC_CLK_N : IN STD_LOGIC;
-    DAC_CLK_P : IN STD_LOGIC;
-    DAC_CLK_N : IN STD_LOGIC
+    fir_data_out_IO_P : OUT STD_LOGIC;    -- _VECTOR(g_NUM_Bits-1 DOWNTO 0);
+    fir_data_out_IO_N : OUT STD_LOGIC    -- _VECTOR(g_NUM_Bits-1 DOWNTO 0)
+
+    --    DAC_CLK_P : IN STD_LOGIC;
+    --    DAC_CLK_N : IN STD_LOGIC
   );
 
 END ENTITY fir_filter_top;
@@ -50,15 +53,28 @@ ARCHITECTURE behave OF fir_filter_top IS
       -- filtered data 
       o_data : OUT STD_LOGIC_VECTOR(C_DATA_OUT_LENGTH - 1 DOWNTO 0));
   END COMPONENT;
+  COMPONENT IBUFGDS
+    GENERIC (
+      CAPACITANCE : STRING := "DONT_CARE";
+      DIFF_TERM : BOOLEAN := FALSE;
+      IBUG_DELAY_VALUE : STRING := "0";
+      IBUF_LOW_PWR : BOOLEAN := TRUE;
+      IOSTANDARD : STRING := "DEFAULT");
+
+    PORT (
+      O : OUT STD_LOGIC;
+      I : IN STD_LOGIC;
+      IB : IN STD_LOGIC
+    );
+  END COMPONENT;
 
   CONSTANT c_NUM_BITS : INTEGER := 16;
   CONSTANT c_SEED_COUNTER_BITS : INTEGER := 16;
   CONSTANT c_CLK_PERIOD : TIME := 2 ns;
-
-
   SIGNAL fir_data_in : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
   SIGNAL fir_data_out : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  
+  SIGNAL fir_data_out_IO : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+
   SIGNAL w_LFSR_Done : STD_LOGIC;
   SIGNAL i_Enable : STD_LOGIC;
 
@@ -75,53 +91,73 @@ ARCHITECTURE behave OF fir_filter_top IS
   SIGNAL FPGA_CLK : STD_LOGIC;
   SIGNAL ADC_CLK : STD_LOGIC;
   SIGNAL DAC_CLK : STD_LOGIC;
-  
+
   SIGNAL stop_reset_timer : STD_LOGIC;
-
-
   SIGNAL MULT : MULT_TYPE;
   SIGNAL ADD : ADD_TYPE;
 BEGIN
   i_Seed_Data <= x"DEAD";
+  fir_data_out_IO <= fir_data_out;
+
+
+  G_DIFF_OBUG : FOR I IN 0 TO 0 GENERATE
+  DIFF_OBUF : OBUFDS PORT MAP (
+    I => fir_data_out_IO(I),
+    O => fir_data_out_IO_P,
+    OB => fir_data_out_IO_N    
+  );
+  END GENERATE G_DIFF_OBUG;
 
   -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  adc_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
-    DIFF_TERM => TRUE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
-    O => adc_clk,
+
+  adc_ibuf : IBUFGDS
+  GENERIC MAP (
+    DIFF_TERM => FALSE,
+    IBUF_LOW_PWR =>  FALSE)
+
+  PORT MAP (
+    O  => ADC_CLK,
     I  => ADC_CLK_P,
     IB => ADC_CLK_N
   );
-  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  dac_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
-    DIFF_TERM => TRUE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
-    O => dac_clk,
-    I  => DAC_CLK_P,
-    IB => DAC_CLK_N
-  );
-  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
-  fpga_clk_ibug : unisim.vcomponents.IBUFDS
-  GENERIC MAP(
-    DIFF_TERM => TRUE,
-    DQS_BIAS => "FALSE",
-    IOSTANDARD => "DEFAULT"
-  )
-  PORT MAP(
-    O => fpga_clk,
-    I =>  FPGA_CLK_P,
-    IB => FPGA_CLK_N
-  );
 
 
+
+  -- adc_clk_ibug : unisim.vcomponents.IBUFDS
+  -- GENERIC MAP(
+  --   DIFF_TERM => TRUE,
+  --   DQS_BIAS => "FALSE",
+  --   IOSTANDARD => "DEFAULT"
+  -- )
+  -- PORT MAP(
+  --   O => adc_clk,
+  --   I => ADC_CLK_P,
+  --   IB => ADC_CLK_N
+  -- );
+  --  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
+  --  dac_clk_ibug : unisim.vcomponents.IBUFDS
+  --  GENERIC MAP(
+  --    DIFF_TERM => TRUE,
+  --    DQS_BIAS => "FALSE",
+  --    IOSTANDARD => "DEFAULT"
+  --  )
+  --  PORT MAP(
+  --    O => dac_clk,
+  --    I  => DAC_CLK_P,
+  --    IB => DAC_CLK_N
+  --  );
+  --  -- GENERATE SINGLE ENDED ADC CLK FROM DIFFERENTIAL INPUT
+  --  fpga_clk_ibug : unisim.vcomponents.IBUFDS
+  --  GENERIC MAP(
+  --    DIFF_TERM => TRUE,
+  --    DQS_BIAS => "FALSE",
+  --    IOSTANDARD => "DEFAULT"
+  --  )
+  --  PORT MAP(
+  --    O => fpga_clk,
+  --    I =>  FPGA_CLK_P,
+  --    IB => FPGA_CLK_N
+  --  );
   p_reset : PROCESS (adc_clk, stop_reset_timer)
   BEGIN
     IF rising_edge(adc_clk) THEN
