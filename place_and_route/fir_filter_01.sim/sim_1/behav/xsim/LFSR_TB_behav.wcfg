@@ -7,19 +7,20 @@
          <top_modules>
             <top_module name="LFSR_TB" />
             <top_module name="fir_filter_pkg" />
+            <top_module name="glbl" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1270fs"></ZoomStartTime>
-      <ZoomEndTime time="1704fs"></ZoomEndTime>
-      <Cursor1Time time="1342fs"></Cursor1Time>
+      <ZoomStartTime time="1018666fs"></ZoomStartTime>
+      <ZoomEndTime time="1036167fs"></ZoomEndTime>
+      <Cursor1Time time="1033821fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="274"></NameColumnWidth>
-      <ValueColumnWidth column_width="117"></ValueColumnWidth>
+      <ValueColumnWidth column_width="105"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="54" />
+   <WVObjectSize size="90" />
    <wvobject type="divider" fp_name="divider146">
       <obj_property name="label">LFSR</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -152,6 +153,10 @@
       <obj_property name="ElementShortName">fir_data_out[15:0]</obj_property>
       <obj_property name="ObjectShortName">fir_data_out[15:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/LFSR_TB/fir_data_out_IO" type="array">
+      <obj_property name="ElementShortName">fir_data_out_IO[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fir_data_out_IO[15:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="/LFSR_TB/w_LFSR_Done" type="logic">
       <obj_property name="ElementShortName">w_LFSR_Done</obj_property>
       <obj_property name="ObjectShortName">w_LFSR_Done</obj_property>
@@ -172,6 +177,10 @@
       <obj_property name="ElementShortName">seed_counter[15:0]</obj_property>
       <obj_property name="ObjectShortName">seed_counter[15:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/LFSR_TB/rst_n" type="logic">
+      <obj_property name="ElementShortName">rst_n</obj_property>
+      <obj_property name="ObjectShortName">rst_n</obj_property>
+   </wvobject>
    <wvobject fp_name="/LFSR_TB/reset_counter" type="array">
       <obj_property name="ElementShortName">reset_counter[11:0]</obj_property>
       <obj_property name="ObjectShortName">reset_counter[11:0]</obj_property>
@@ -187,10 +196,6 @@
    <wvobject fp_name="/LFSR_TB/DAC_CLK" type="logic">
       <obj_property name="ElementShortName">DAC_CLK</obj_property>
       <obj_property name="ObjectShortName">DAC_CLK</obj_property>
-   </wvobject>
-   <wvobject fp_name="/LFSR_TB/rst_n" type="logic">
-      <obj_property name="ElementShortName">rst_n</obj_property>
-      <obj_property name="ObjectShortName">rst_n</obj_property>
    </wvobject>
    <wvobject fp_name="/LFSR_TB/stop_reset_timer" type="logic">
       <obj_property name="ElementShortName">stop_reset_timer</obj_property>
@@ -223,6 +228,164 @@
    <wvobject fp_name="/LFSR_TB/LFSR_DataArray_Q" type="array">
       <obj_property name="ElementShortName">LFSR_DataArray_Q[3:0][15:0]</obj_property>
       <obj_property name="ObjectShortName">LFSR_DataArray_Q[3:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/MULT" type="array">
+      <obj_property name="ElementShortName">MULT[3:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">MULT[3:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/ADD" type="array">
+      <obj_property name="ElementShortName">ADD[3:0][15:0]</obj_property>
+      <obj_property name="ObjectShortName">ADD[3:0][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/LFSR_1/o_LFSR_Data" type="array">
+      <obj_property name="ElementShortName">o_LFSR_Data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">o_LFSR_Data[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/Valid_in" type="logic">
+      <obj_property name="ElementShortName">Valid_in</obj_property>
+      <obj_property name="ObjectShortName">Valid_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/LFSR_1/o_LFSR_Data" type="array">
+      <obj_property name="ElementShortName">o_LFSR_Data[15:0]</obj_property>
+      <obj_property name="ObjectShortName">o_LFSR_Data[15:0]</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/Valid_in_cnt" type="array">
+      <obj_property name="ElementShortName">Valid_in_cnt[3:0]</obj_property>
+      <obj_property name="ObjectShortName">Valid_in_cnt[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d1_strb_Q" type="logic">
+      <obj_property name="ElementShortName">d1_strb_Q</obj_property>
+      <obj_property name="ObjectShortName">d1_strb_Q</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d2_strb_Q" type="logic">
+      <obj_property name="ElementShortName">d2_strb_Q</obj_property>
+      <obj_property name="ObjectShortName">d2_strb_Q</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d3_strb_Q" type="logic">
+      <obj_property name="ElementShortName">d3_strb_Q</obj_property>
+      <obj_property name="ObjectShortName">d3_strb_Q</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d4_strb_Q" type="logic">
+      <obj_property name="ElementShortName">d4_strb_Q</obj_property>
+      <obj_property name="ObjectShortName">d4_strb_Q</obj_property>
+      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d1_Q" type="array">
+      <obj_property name="ElementShortName">d1_Q[15:0]</obj_property>
+      <obj_property name="ObjectShortName">d1_Q[15:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FAAFBE</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d2_Q" type="array">
+      <obj_property name="ElementShortName">d2_Q[15:0]</obj_property>
+      <obj_property name="ObjectShortName">d2_Q[15:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d3_Q" type="array">
+      <obj_property name="ElementShortName">d3_Q[15:0]</obj_property>
+      <obj_property name="ObjectShortName">d3_Q[15:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/d4_Q" type="array">
+      <obj_property name="ElementShortName">d4_Q[15:0]</obj_property>
+      <obj_property name="ObjectShortName">d4_Q[15:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/s_adc_data_Valid" type="array">
+      <obj_property name="ElementShortName">s_adc_data_Valid[15:0]</obj_property>
+      <obj_property name="ObjectShortName">s_adc_data_Valid[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo1_din" type="array">
+      <obj_property name="ElementShortName">fifo1_din[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo1_din[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo2_din" type="array">
+      <obj_property name="ElementShortName">fifo2_din[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo2_din[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo3_din" type="array">
+      <obj_property name="ElementShortName">fifo3_din[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo3_din[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo4_din" type="array">
+      <obj_property name="ElementShortName">fifo4_din[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo4_din[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo1_wr_en" type="logic">
+      <obj_property name="ElementShortName">fifo1_wr_en</obj_property>
+      <obj_property name="ObjectShortName">fifo1_wr_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo2_wr_en" type="logic">
+      <obj_property name="ElementShortName">fifo2_wr_en</obj_property>
+      <obj_property name="ObjectShortName">fifo2_wr_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo3_wr_en" type="logic">
+      <obj_property name="ElementShortName">fifo3_wr_en</obj_property>
+      <obj_property name="ObjectShortName">fifo3_wr_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo4_wr_en" type="logic">
+      <obj_property name="ElementShortName">fifo4_wr_en</obj_property>
+      <obj_property name="ObjectShortName">fifo4_wr_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo1_rd_en" type="logic">
+      <obj_property name="ElementShortName">fifo1_rd_en</obj_property>
+      <obj_property name="ObjectShortName">fifo1_rd_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo2_rd_en" type="logic">
+      <obj_property name="ElementShortName">fifo2_rd_en</obj_property>
+      <obj_property name="ObjectShortName">fifo2_rd_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo3_rd_en" type="logic">
+      <obj_property name="ElementShortName">fifo3_rd_en</obj_property>
+      <obj_property name="ObjectShortName">fifo3_rd_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo4_rd_en" type="logic">
+      <obj_property name="ElementShortName">fifo4_rd_en</obj_property>
+      <obj_property name="ObjectShortName">fifo4_rd_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo1_dout" type="array">
+      <obj_property name="ElementShortName">fifo1_dout[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo1_dout[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo2_dout" type="array">
+      <obj_property name="ElementShortName">fifo2_dout[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo2_dout[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo3_dout" type="array">
+      <obj_property name="ElementShortName">fifo3_dout[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo3_dout[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo4_dout" type="array">
+      <obj_property name="ElementShortName">fifo4_dout[15:0]</obj_property>
+      <obj_property name="ObjectShortName">fifo4_dout[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo1_rst" type="logic">
+      <obj_property name="ElementShortName">fifo1_rst</obj_property>
+      <obj_property name="ObjectShortName">fifo1_rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo2_rst" type="logic">
+      <obj_property name="ElementShortName">fifo2_rst</obj_property>
+      <obj_property name="ObjectShortName">fifo2_rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo3_rst" type="logic">
+      <obj_property name="ElementShortName">fifo3_rst</obj_property>
+      <obj_property name="ObjectShortName">fifo3_rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/LFSR_TB/fifo4_rst" type="logic">
+      <obj_property name="ElementShortName">fifo4_rst</obj_property>
+      <obj_property name="ObjectShortName">fifo4_rst</obj_property>
    </wvobject>
    <wvobject fp_name="/LFSR_TB/c_NUM_BITS" type="other">
       <obj_property name="ElementShortName">c_NUM_BITS</obj_property>
