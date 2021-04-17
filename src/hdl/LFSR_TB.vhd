@@ -147,7 +147,7 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL INT_ADC_CLK_N : STD_LOGIC := '0';
   SIGNAL INT_DAC_CLK_P : STD_LOGIC := '0';
   SIGNAL INT_DAC_CLK_N : STD_LOGIC := '0';
-  SIGNAL LFSR_DataArray_Q : COEFS_TYPE := (OTHERS => (OTHERS => '0'));
+
 
   SIGNAL MULT : MULT_TYPE;
   SIGNAL ADD : ADD_TYPE;
@@ -162,7 +162,7 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL fifo1_wr_en, fifo2_wr_en, fifo3_wr_en, fifo4_wr_en : STD_LOGIC;
   SIGNAL fifo1_rd_en, fifo2_rd_en, fifo3_rd_en, fifo4_rd_en : STD_LOGIC;
   SIGNAL fifo1_dout, fifo2_dout, fifo3_dout, fifo4_dout : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  SIGNAL fifo1_rst, fifo2_rst, fifo3_rst, fifo4_rst : STD_LOGIC;  
+  SIGNAL fifo1_rst, fifo2_rst, fifo3_rst, fifo4_rst : STD_LOGIC;
   SIGNAL fifo1_empty, fifo2_empty, fifo3_empty, fifo4_empty, fifo_data_valid : STD_LOGIC;
 
   SIGNAL dac_fifo1_din, dac_fifo2_din, dac_fifo3_din, dac_fifo4_din : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
@@ -171,7 +171,7 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL dac_fifo1_dout, dac_fifo2_dout, dac_fifo3_dout, dac_fifo4_dout : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
   SIGNAL dac_fifo1_rst, dac_fifo2_rst, dac_fifo3_rst, dac_fifo4_rst : STD_LOGIC;
   SIGNAL dac_fifo1_empty, dac_fifo2_empty, dac_fifo3_empty, dac_fifo4_empty : STD_LOGIC;
-  SIGNAL dac_fifo1_data_count :  STD_LOGIC_VECTOR(16 DOWNTO 0);
+  SIGNAL dac_fifo1_data_count : STD_LOGIC_VECTOR(16 DOWNTO 0);
 
   SIGNAL d_strb_Q, d1_strb_Q, d2_strb_Q, d3_strb_Q, d4_strb_Q : STD_LOGIC;
   SIGNAL d1_strb_QQ, d2_strb_QQ, d3_strb_QQ, d4_strb_QQ : STD_LOGIC;
@@ -181,8 +181,8 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL d_out1_Q, d_out2_Q, d_out3_Q, d_out4_Q : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
 
   SIGNAL s_fir_data_in, s_fir_data_in_Q, s_fir_data_in_QQ : STD_LOGIC_VECTOR(3 DOWNTO 0);
-  SIGNAL s_fir_data_out : STD_LOGIC_VECTOR(3 DOWNTO 0);
-  SIGNAL s_dac_fifo_wr_strb : STD_LOGIC_VECTOR(11 DOWNTO 0);
+  SIGNAL s_fir_data_out, s_fir_data_out2 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+  SIGNAL s_dac_fifo_wr_strb, s_dac_fifo_rd_strb : STD_LOGIC_VECTOR(11 DOWNTO 0);
   SIGNAL fir_data_in_Q : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
 
 BEGIN
@@ -630,24 +630,56 @@ BEGIN
     END IF;
   END PROCESS p_dac_data_queue;
 
-  -- p_upconv_data_sample : PROCESS (dac_clk, rst_n)
-  -- BEGIN
-  --   IF (rst_n = '0') THEN
-  --     fir_data_in_Q <= (OTHERS => '0');
-  --   ELSIF rising_edge(dac_clk) THEN
-  --     --default values 
+  p_upconv_data_sample : PROCESS (dac_clk, rst_n)
+  BEGIN
+    IF (rst_n = '0') THEN
+      dac_fifo1_rd_en <= '0';
+      dac_fifo2_rd_en <= '0';
+      dac_fifo3_rd_en <= '0';
+      dac_fifo4_rd_en <= '0';
+      d_rd_counter_en <= '0';
+    ELSIF rising_edge(dac_clk) THEN
+      --default values 
+      dac_fifo1_rd_en <= '0';
+      dac_fifo2_rd_en <= '0';
+      dac_fifo3_rd_en <= '0';
+      dac_fifo4_rd_en <= '0';
+      IF (dac_fifo1_data_count(9) = '1') THEN -- 256 sample in dac_fifo1
+        d_rd_counter_en <= '1';
+        s_dac_fifo_rd_strb <= s_dac_fifo_rd_strb(10 DOWNTO 0) & d_rd_counter_en;
+      ELSIF (dac_fifo1_empty = '1') THEN
+        d_rd_counter_en <= '0';
+        s_dac_fifo_rd_strb <= (OTHERS => '0');
+      END IF;
 
-  --     IF (s_fir_data_in_QQ(0) = '1') THEN
-  --       fir_data_in_Q <= d_out1_Q;
-  --     ELSIF (s_fir_data_in_QQ(1) = '1') THEN
-  --       fir_data_in_Q <= d_out2_Q;
-  --     ELSIF (s_fir_data_in_QQ(2) = '1') THEN
-  --       fir_data_in_Q <= d_out3_Q;
-  --     ELSIF (s_fir_data_in_QQ(3) = '1') THEN
-  --       fir_data_in_Q <= d_out4_Q;
-  --     END IF;
-  --   END IF;
-  -- END PROCESS p_upconv_data_sample;
+      IF (d_rd_counter_en = '1') THEN
+        dac_fifo1_rd_en <= '1';
+        dac_fifo2_rd_en <= '1';
+        dac_fifo3_rd_en <= '1';
+        dac_fifo4_rd_en <= '1';
+      END IF;
+
+      IF (s_dac_fifo_rd_strb(FIR_PIPELINE_DLY) = '1') THEN
+        s_fir_data_out2 <= s_fir_data_out2(2 DOWNTO 0) & b"0";
+        IF (s_fir_data_out2(0) = '1') THEN
+          fir_data_out_IO <= dac_fifo1_dout;
+        ELSIF (s_fir_data_out2(1) = '1') THEN
+          fir_data_out_IO <= dac_fifo2_dout;
+        ELSIF (s_fir_data_out2(2) = '1') THEN
+          fir_data_out_IO <= dac_fifo3_dout;
+        ELSIF (s_fir_data_out2(3) = '1') THEN
+          fir_data_out_IO <= dac_fifo4_dout;
+          s_fir_data_out2 <= x"1";
+        END IF;
+      END IF;
+
+      IF (d_rd_counter = 0) THEN
+        d_rd_counter <= (OTHERS => '1');
+      ELSIF (d_rd_counter_en = '1') THEN
+        d_rd_counter <= d_wr_counter - b"1";
+      END IF;
+    END IF;
+  END PROCESS p_upconv_data_sample;
 
   LFSR_1 : ENTITY work.LFSR
     GENERIC MAP(
