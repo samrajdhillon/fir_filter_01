@@ -51,7 +51,7 @@ ENTITY fir_filter_top IS
 END ENTITY fir_filter_top;
 ARCHITECTURE behave OF fir_filter_top IS
   CONSTANT FIR_PIPELINE_DLY : INTEGER := 10;
-  CONSTANT DAC_FIFO_SIZE : INTEGER := 15;
+  CONSTANT DAC_FIFO_SIZE : INTEGER := 16;
   CONSTANT c_NUM_BITS : INTEGER := 16;
   CONSTANT c_SEED_COUNTER_BITS : INTEGER := 16;
   CONSTANT c_CLK_PERIOD : TIME := 2 ns;
@@ -659,37 +659,28 @@ BEGIN
       s_fir_data_out2 <= x"1";
     ELSIF rising_edge(DAC_CLK) THEN
       --default values 
-      dac_fifo1_rd_en <= '0';
-      dac_fifo2_rd_en <= '0';
-      dac_fifo3_rd_en <= '0';
-      dac_fifo4_rd_en <= '0';
+
 
       IF (dac_fifo1_data_count(DAC_FIFO_SIZE - 7) = '1') THEN -- WHEN DAC FIFO HALF FULL, START PULLING OUT SAMPLE @ DAC CLK RATE
         d_rd_counter_en <= '1';
       ELSIF (dac_fifo1_empty = '1') THEN
         d_rd_counter_en <= '0';
         s_dac_fifo_rd_strb <= (OTHERS => '0');
+        dac_fifo1_rd_en <= '0';
+        dac_fifo2_rd_en <= '0';
+        dac_fifo3_rd_en <= '0';
+        dac_fifo4_rd_en <= '0';
       END IF;
 
       IF (d_rd_counter_en = '1') THEN
-        IF (s_dac_fifo_rd_strb(0) = '1') THEN
-          dac_fifo1_rd_en <= '1';
-          dac_fifo2_rd_en <= '1';
-          dac_fifo3_rd_en <= '1';
-          dac_fifo4_rd_en <= '1';
-        END IF;
         -- DAC_VALID_OUT <= '1';
         s_dac_fifo_rd_strb <= s_dac_fifo_rd_strb(10 DOWNTO 0) & b"1";
       END IF;
 
-      IF (s_dac_fifo_rd_strb(FIR_PIPELINE_DLY) = '1') THEN
+      IF (s_dac_fifo_rd_strb(FIR_PIPELINE_DLY) = '1' AND d_rd_counter_en = '1') THEN
+        -- IF () THEN
 
         s_fir_data_out2 <= s_fir_data_out2(2 DOWNTO 0) & b"0";
-
-        dac_fifo1_rd_en <= '1';
-        dac_fifo2_rd_en <= '1';
-        dac_fifo3_rd_en <= '1';
-        dac_fifo4_rd_en <= '1';
 
         IF (s_fir_data_out2(0) = '1') THEN
           DAC_DATA_IN <= dac_fifo1_dout;
@@ -705,10 +696,16 @@ BEGIN
 
         IF (s_fir_data_out2(3) = '1') THEN
           DAC_DATA_IN <= dac_fifo4_dout;
+
           s_fir_data_out2 <= x"1";
+          dac_fifo1_rd_en <= '1';
+          dac_fifo2_rd_en <= '1';
+          dac_fifo3_rd_en <= '1';
+          dac_fifo4_rd_en <= '1';
         END IF;
 
       END IF;
+      -- END IF;
 
       IF (d_rd_counter = 0) THEN
         d_rd_counter <= (OTHERS => '1');
