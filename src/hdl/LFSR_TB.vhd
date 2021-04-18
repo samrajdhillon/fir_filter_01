@@ -41,6 +41,12 @@ ENTITY LFSR_TB IS
 END ENTITY LFSR_TB;
 
 ARCHITECTURE behave OF LFSR_TB IS
+  CONSTANT FIR_PIPELINE_DLY : INTEGER := 10;
+  CONSTANT DAC_FIFO_SIZE : INTEGER := 16;
+  CONSTANT c_NUM_BITS : INTEGER := 16;
+  CONSTANT c_SEED_COUNTER_BITS : INTEGER := 16;
+  CONSTANT c_CLK_PERIOD : TIME := 2 ns;
+
   COMPONENT FIR_FIFO1
     PORT (
       clk : IN STD_LOGIC;
@@ -52,7 +58,7 @@ ARCHITECTURE behave OF LFSR_TB IS
       full : OUT STD_LOGIC;
       almost_full : OUT STD_LOGIC;
       empty : OUT STD_LOGIC;
-      data_count : OUT STD_LOGIC_VECTOR(16 DOWNTO 0)
+      data_count : OUT STD_LOGIC_VECTOR(DAC_FIFO_SIZE - 1 DOWNTO 0)
     );
   END COMPONENT;
   COMPONENT FIR_FIFO2
@@ -66,7 +72,7 @@ ARCHITECTURE behave OF LFSR_TB IS
       full : OUT STD_LOGIC;
       almost_full : OUT STD_LOGIC;
       empty : OUT STD_LOGIC;
-      data_count : OUT STD_LOGIC_VECTOR(16 DOWNTO 0)
+      data_count : OUT STD_LOGIC_VECTOR(DAC_FIFO_SIZE - 1 DOWNTO 0)
     );
   END COMPONENT;
 
@@ -106,14 +112,9 @@ ARCHITECTURE behave OF LFSR_TB IS
       IB : IN STD_LOGIC
     );
   END COMPONENT;
-
-  CONSTANT FIR_PIPELINE_DLY : INTEGER := 10;
-  CONSTANT c_NUM_BITS : INTEGER := 16;
-  CONSTANT c_SEED_COUNTER_BITS : INTEGER := 16;
-  CONSTANT c_CLK_PERIOD : TIME := 2 ns;
   SIGNAL fir_data_in : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  SIGNAL fir_data_out : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  SIGNAL fir_data_out_IO : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL FIR_DATA_o : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL DAC_DATA_IN : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
 
   SIGNAL w_LFSR_Done : STD_LOGIC;
   SIGNAL i_Enable : STD_LOGIC;
@@ -124,15 +125,15 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL seed_counter : STD_LOGIC_VECTOR(c_SEED_COUNTER_BITS - 1 DOWNTO 0) := (OTHERS => '0');
 
   --reset 
-  SIGNAL rst_n : STD_LOGIC := '0';
+  SIGNAL RST_N : STD_LOGIC := '0';
   SIGNAL reset_counter : STD_LOGIC_VECTOR(11 DOWNTO 0) := (OTHERS => '0');
   SIGNAL d_valid_counter : STD_LOGIC_VECTOR(3 DOWNTO 0) := (OTHERS => '1');
   SIGNAL d_valid_counter_en : STD_LOGIC;
 
   SIGNAL d_read_counter : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '1');
   SIGNAL d_read_counter_en : STD_LOGIC;
-  SIGNAL d_wr_counter : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '1');
-  SIGNAL d_wr_counter_en : STD_LOGIC;
+  SIGNAL d_wr_counter, d_rd_counter : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '1');
+  SIGNAL d_wr_counter_en, d_rd_counter_en : STD_LOGIC;
 
   -- clk
   SIGNAL FPGA_CLK : STD_LOGIC;
@@ -147,8 +148,6 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL INT_ADC_CLK_N : STD_LOGIC := '0';
   SIGNAL INT_DAC_CLK_P : STD_LOGIC := '0';
   SIGNAL INT_DAC_CLK_N : STD_LOGIC := '0';
-
-
   SIGNAL MULT : MULT_TYPE;
   SIGNAL ADD : ADD_TYPE;
 
@@ -171,7 +170,7 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL dac_fifo1_dout, dac_fifo2_dout, dac_fifo3_dout, dac_fifo4_dout : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
   SIGNAL dac_fifo1_rst, dac_fifo2_rst, dac_fifo3_rst, dac_fifo4_rst : STD_LOGIC;
   SIGNAL dac_fifo1_empty, dac_fifo2_empty, dac_fifo3_empty, dac_fifo4_empty : STD_LOGIC;
-  SIGNAL dac_fifo1_data_count : STD_LOGIC_VECTOR(16 DOWNTO 0);
+  SIGNAL dac_fifo1_data_count : STD_LOGIC_VECTOR(DAC_FIFO_SIZE - 1 DOWNTO 0);
 
   SIGNAL d_strb_Q, d1_strb_Q, d2_strb_Q, d3_strb_Q, d4_strb_Q : STD_LOGIC;
   SIGNAL d1_strb_QQ, d2_strb_QQ, d3_strb_QQ, d4_strb_QQ : STD_LOGIC;
@@ -183,14 +182,14 @@ ARCHITECTURE behave OF LFSR_TB IS
   SIGNAL s_fir_data_in, s_fir_data_in_Q, s_fir_data_in_QQ : STD_LOGIC_VECTOR(3 DOWNTO 0);
   SIGNAL s_fir_data_out, s_fir_data_out2 : STD_LOGIC_VECTOR(3 DOWNTO 0);
   SIGNAL s_dac_fifo_wr_strb, s_dac_fifo_rd_strb : STD_LOGIC_VECTOR(11 DOWNTO 0);
-  SIGNAL fir_data_in_Q : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL FIR_DATA_Q_i : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
 
 BEGIN
   i_Seed_Data <= x"DEAD";
-  -- fir_data_out_IO <= fir_data_out;
+  -- DAC_DATA_IN <= FIR_DATA_o;
   --  G_DIFF_OBUG : FOR I IN 0 TO 0 GENERATE
   --  DIFF_OBUF : OBUFDS PORT MAP (
-  --    I => fir_data_out_IO(I),
+  --    I => DAC_DATA_IN(I),
   --    O => fir_data_out_IO_P,
   --    OB => fir_data_out_IO_N    
   --  );
@@ -213,7 +212,7 @@ BEGIN
     DIFF_TERM => FALSE,
     IBUF_LOW_PWR => FALSE)
   PORT MAP(
-    O => dac_clk,
+    O => DAC_CLK,
     I => INT_DAC_CLK_P,
     IB => INT_DAC_CLK_N
   );
@@ -224,7 +223,7 @@ BEGIN
     DIFF_TERM => FALSE,
     IBUF_LOW_PWR => FALSE)
   PORT MAP(
-    O => fpga_clk,
+    O => FPGA_CLK,
     I => INT_FPGA_CLK_P,
     IB => INT_FPGA_CLK_N
   );
@@ -234,18 +233,18 @@ BEGIN
   INT_ADC_CLK_N <= NOT INT_ADC_CLK_P;
   INT_DAC_CLK_P <= NOT INT_DAC_CLK_P AFTER c_CLK_PERIOD/8;
   INT_DAC_CLK_N <= NOT INT_DAC_CLK_P;
-  fifo1_rst <= NOT rst_n;
-  fifo2_rst <= NOT rst_n;
-  fifo3_rst <= NOT rst_n;
-  fifo4_rst <= NOT rst_n;
-  dac_fifo1_rst <= NOT rst_n;
-  dac_fifo2_rst <= NOT rst_n;
-  dac_fifo3_rst <= NOT rst_n;
-  dac_fifo4_rst <= NOT rst_n;
+  fifo1_rst <= NOT RST_N;
+  fifo2_rst <= NOT RST_N;
+  fifo3_rst <= NOT RST_N;
+  fifo4_rst <= NOT RST_N;
+  dac_fifo1_rst <= NOT RST_N;
+  dac_fifo2_rst <= NOT RST_N;
+  dac_fifo3_rst <= NOT RST_N;
+  dac_fifo4_rst <= NOT RST_N;
 
   U_FIR_FIFO1 : FIR_FIFO1
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => fifo1_rst,
     din => fifo1_din,
     wr_en => fifo1_wr_en,
@@ -259,7 +258,7 @@ BEGIN
 
   U_FIR_FIFO2 : FIR_FIFO1
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => fifo2_rst,
     din => fifo2_din,
     wr_en => fifo2_wr_en,
@@ -273,7 +272,7 @@ BEGIN
 
   U_FIR_FIFO3 : FIR_FIFO1
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => fifo3_rst,
     din => fifo3_din,
     wr_en => fifo3_wr_en,
@@ -287,7 +286,7 @@ BEGIN
 
   U_FIR_FIFO4 : FIR_FIFO1
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => fifo4_rst,
     din => fifo4_din,
     wr_en => fifo4_wr_en,
@@ -301,7 +300,7 @@ BEGIN
 
   U_DAC_FIR_FIFO1 : FIR_FIFO2
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => dac_fifo1_rst,
     din => dac_fifo1_din,
     wr_en => dac_fifo1_wr_en,
@@ -315,7 +314,7 @@ BEGIN
 
   U_DAC_FIR_FIFO2 : FIR_FIFO2
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => dac_fifo2_rst,
     din => dac_fifo2_din,
     wr_en => dac_fifo2_wr_en,
@@ -329,7 +328,7 @@ BEGIN
 
   U_DAC_FIR_FIFO3 : FIR_FIFO2
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => dac_fifo3_rst,
     din => dac_fifo3_din,
     wr_en => dac_fifo3_wr_en,
@@ -343,7 +342,7 @@ BEGIN
 
   U_DAC_FIR_FIFO4 : FIR_FIFO2
   PORT MAP(
-    clk => fpga_clk,
+    clk => FPGA_CLK,
     srst => dac_fifo4_rst,
     din => dac_fifo4_din,
     wr_en => dac_fifo4_wr_en,
@@ -355,9 +354,9 @@ BEGIN
     data_count => OPEN
   );
   -- Generate Fake Valid strb every 16th sample
-  p_valid : PROCESS (adc_clk, rst_n)
+  p_valid : PROCESS (adc_clk, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       Valid_in <= '0';
       Valid_in_cnt <= (OTHERS => '0');
     ELSIF rising_edge(adc_clk) THEN
@@ -375,7 +374,7 @@ BEGIN
   p_reset : PROCESS (adc_clk, stop_reset_timer)
   BEGIN
     IF rising_edge(adc_clk) THEN
-      rst_n <= reset_counter(11);
+      RST_N <= reset_counter(11);
       IF (stop_reset_timer = '0') THEN
         reset_counter <= reset_counter + b"1";
       END IF;
@@ -384,9 +383,9 @@ BEGIN
 
   stop_reset_timer <= reset_counter(11);
 
-  p_Seed : PROCESS (adc_clk, rst_n)
+  p_Seed : PROCESS (adc_clk, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       i_Seed_DV <= '1';
       i_Enable <= '0';
     ELSIF rising_edge(adc_clk) THEN
@@ -403,9 +402,9 @@ BEGIN
     END IF;
   END PROCESS p_Seed;
 
-  p_adc_data : PROCESS (adc_clk, rst_n)
+  p_adc_data : PROCESS (adc_clk, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       d_valid_counter_en <= '0';
       d_valid_counter <= (OTHERS => '1');
       s_adc_data_Valid <= (OTHERS => '0');
@@ -423,10 +422,10 @@ BEGIN
       d3_strb_Q <= s_adc_data_Valid(2) OR s_adc_data_Valid(6) OR s_adc_data_Valid(10) OR s_adc_data_Valid(14);
       d4_strb_Q <= s_adc_data_Valid(3) OR s_adc_data_Valid(7) OR s_adc_data_Valid(11) OR s_adc_data_Valid(15);
 
-      d1_strb_QQ <= d1_strb_Q;
-      d2_strb_QQ <= d2_strb_Q;
-      d3_strb_QQ <= d3_strb_Q;
-      d4_strb_QQ <= d4_strb_Q;
+      -- d1_strb_QQ <= d1_strb_Q;
+      -- d2_strb_QQ <= d2_strb_Q;
+      -- d3_strb_QQ <= d3_strb_Q;
+      -- d4_strb_QQ <= d4_strb_Q;
 
       -- TRIGGER FIFO ENABLE LOGIC AFTER LAST VALID REGISTER WR AND HOLD IT HIGH FOR VALID DATA PERIOD
       IF (d4_strb_Q = '1') THEN
@@ -446,29 +445,35 @@ BEGIN
       -- direct incoming adc data into four different register for parallelism to save and process it at slower clock rate
       IF (d1_strb_Q = '1') THEN
         d1_Q <= fir_data_in;
-      ELSIF (d2_strb_Q = '1') THEN
+      END IF;
+
+      IF (d2_strb_Q = '1') THEN
         d2_Q <= fir_data_in;
-      ELSIF (d3_strb_Q = '1') THEN
+      END IF;
+
+      IF (d3_strb_Q = '1') THEN
         d3_Q <= fir_data_in;
-      ELSIF (d4_strb_Q = '1') THEN
+      END IF;
+
+      IF (d4_strb_Q = '1') THEN
         d4_Q <= fir_data_in;
       END IF;
 
       d1_QQ <= d1_Q;
       d2_QQ <= d2_Q;
       d3_QQ <= d3_Q;
-      d4_QQ <= d4_Q;
+      -- d4_QQ <= d4_Q;
 
       d1_QQQ <= d1_QQ;
       d2_QQQ <= d2_QQ;
-      d3_QQQ <= d3_QQ;
-      d4_QQQ <= d4_QQ;
+      -- d3_QQQ <= d3_QQ;
+      -- d4_QQQ <= d4_QQ;
     END IF;
   END PROCESS p_adc_data;
 
-  p_load_fifo : PROCESS (fpga_clk, rst_n)
+  p_load_fifo : PROCESS (FPGA_CLK, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       fifo1_din <= x"DEAD";
       fifo1_wr_en <= '0';
       fifo2_din <= x"BABE";
@@ -480,7 +485,7 @@ BEGIN
       -- fifo3_rd_en  
       -- fifo3_dout  
 
-    ELSIF rising_edge(fpga_clk) THEN
+    ELSIF rising_edge(FPGA_CLK) THEN
       --default values 
       fifo1_wr_en <= '0';
       fifo2_wr_en <= '0';
@@ -504,9 +509,9 @@ BEGIN
     END IF;
   END PROCESS p_load_fifo;
 
-  p_fetch_fifo : PROCESS (fpga_clk, rst_n)
+  p_fetch_fifo : PROCESS (FPGA_CLK, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       fifo1_rd_en <= '0';
       fifo2_rd_en <= '0';
       fifo3_rd_en <= '0';
@@ -515,7 +520,7 @@ BEGIN
       d_read_counter_en <= '0';
       s_fir_data_in_Q <= (OTHERS => '0');
       s_fir_data_in_QQ <= (OTHERS => '0');
-    ELSIF rising_edge(fpga_clk) THEN
+    ELSIF rising_edge(FPGA_CLK) THEN
       --default values 
       fifo1_rd_en <= '0';
       fifo2_rd_en <= '0';
@@ -553,29 +558,27 @@ BEGIN
     END IF;
   END PROCESS p_fetch_fifo;
 
-  p_data_pipeline : PROCESS (fpga_clk, rst_n)
+  p_data_pipeline : PROCESS (FPGA_CLK, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
-      fir_data_in_Q <= (OTHERS => '0');
-    ELSIF rising_edge(fpga_clk) THEN
+    IF (RST_N = '0') THEN
+      FIR_DATA_Q_i <= (OTHERS => '0');
+    ELSIF rising_edge(FPGA_CLK) THEN
       --default values 
 
       IF (s_fir_data_in_QQ(0) = '1') THEN
-        fir_data_in_Q <= d_out1_Q;
+        FIR_DATA_Q_i <= d_out1_Q;
       ELSIF (s_fir_data_in_QQ(1) = '1') THEN
-        fir_data_in_Q <= d_out2_Q;
+        FIR_DATA_Q_i <= d_out2_Q;
       ELSIF (s_fir_data_in_QQ(2) = '1') THEN
-        fir_data_in_Q <= d_out3_Q;
+        FIR_DATA_Q_i <= d_out3_Q;
       ELSIF (s_fir_data_in_QQ(3) = '1') THEN
-        fir_data_in_Q <= d_out4_Q;
+        FIR_DATA_Q_i <= d_out4_Q;
       END IF;
     END IF;
   END PROCESS p_data_pipeline;
-
-
-  p_dac_data_queue : PROCESS (fpga_clk, rst_n)
+  p_dac_data_queue : PROCESS (FPGA_CLK, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       dac_fifo1_din <= x"DEAD";
       dac_fifo1_wr_en <= '0';
       dac_fifo2_din <= x"BABE";
@@ -588,7 +591,7 @@ BEGIN
       s_dac_fifo_wr_strb <= (OTHERS => '0');
       d_wr_counter_en <= '0';
       s_fir_data_out <= x"1";
-    ELSIF rising_edge(fpga_clk) THEN
+    ELSIF rising_edge(FPGA_CLK) THEN
       --default values 
       dac_fifo1_wr_en <= '0';
       dac_fifo2_wr_en <= '0';
@@ -608,16 +611,16 @@ BEGIN
         s_fir_data_out <= s_fir_data_out(2 DOWNTO 0) & b"0";
         IF (s_fir_data_out(0) = '1') THEN
           dac_fifo1_wr_en <= '1';
-          dac_fifo1_din <= fir_data_out;
+          dac_fifo1_din <= FIR_DATA_o;
         ELSIF (s_fir_data_out(1) = '1') THEN
           dac_fifo2_wr_en <= '1';
-          dac_fifo2_din <= fir_data_out;
+          dac_fifo2_din <= FIR_DATA_o;
         ELSIF (s_fir_data_out(2) = '1') THEN
           dac_fifo3_wr_en <= '1';
-          dac_fifo3_din <= fir_data_out;
+          dac_fifo3_din <= FIR_DATA_o;
         ELSIF (s_fir_data_out(3) = '1') THEN
           dac_fifo4_wr_en <= '1';
-          dac_fifo4_din <= fir_data_out;
+          dac_fifo4_din <= FIR_DATA_o;
           s_fir_data_out <= x"1";
         END IF;
       END IF;
@@ -630,48 +633,64 @@ BEGIN
     END IF;
   END PROCESS p_dac_data_queue;
 
-  p_upconv_data_sample : PROCESS (dac_clk, rst_n)
+  p_upconv_data_sample : PROCESS (DAC_CLK, RST_N)
   BEGIN
-    IF (rst_n = '0') THEN
+    IF (RST_N = '0') THEN
       dac_fifo1_rd_en <= '0';
       dac_fifo2_rd_en <= '0';
       dac_fifo3_rd_en <= '0';
       dac_fifo4_rd_en <= '0';
       d_rd_counter_en <= '0';
-    ELSIF rising_edge(dac_clk) THEN
+      s_fir_data_out2 <= x"1";
+    ELSIF rising_edge(DAC_CLK) THEN
       --default values 
-      dac_fifo1_rd_en <= '0';
-      dac_fifo2_rd_en <= '0';
-      dac_fifo3_rd_en <= '0';
-      dac_fifo4_rd_en <= '0';
-      IF (dac_fifo1_data_count(9) = '1') THEN -- 256 sample in dac_fifo1
+
+
+      IF (dac_fifo1_data_count(DAC_FIFO_SIZE - 7) = '1') THEN -- WHEN DAC FIFO HALF FULL, START PULLING OUT SAMPLE @ DAC CLK RATE
         d_rd_counter_en <= '1';
-        s_dac_fifo_rd_strb <= s_dac_fifo_rd_strb(10 DOWNTO 0) & d_rd_counter_en;
       ELSIF (dac_fifo1_empty = '1') THEN
         d_rd_counter_en <= '0';
         s_dac_fifo_rd_strb <= (OTHERS => '0');
+        dac_fifo1_rd_en <= '0';
+        dac_fifo2_rd_en <= '0';
+        dac_fifo3_rd_en <= '0';
+        dac_fifo4_rd_en <= '0';
       END IF;
 
       IF (d_rd_counter_en = '1') THEN
-        dac_fifo1_rd_en <= '1';
-        dac_fifo2_rd_en <= '1';
-        dac_fifo3_rd_en <= '1';
-        dac_fifo4_rd_en <= '1';
+        -- DAC_VALID_OUT <= '1';
+        s_dac_fifo_rd_strb <= s_dac_fifo_rd_strb(10 DOWNTO 0) & b"1";
       END IF;
 
-      IF (s_dac_fifo_rd_strb(FIR_PIPELINE_DLY) = '1') THEN
+      IF (s_dac_fifo_rd_strb(FIR_PIPELINE_DLY) = '1' AND d_rd_counter_en = '1') THEN
+        -- IF () THEN
+
         s_fir_data_out2 <= s_fir_data_out2(2 DOWNTO 0) & b"0";
+
         IF (s_fir_data_out2(0) = '1') THEN
-          fir_data_out_IO <= dac_fifo1_dout;
-        ELSIF (s_fir_data_out2(1) = '1') THEN
-          fir_data_out_IO <= dac_fifo2_dout;
-        ELSIF (s_fir_data_out2(2) = '1') THEN
-          fir_data_out_IO <= dac_fifo3_dout;
-        ELSIF (s_fir_data_out2(3) = '1') THEN
-          fir_data_out_IO <= dac_fifo4_dout;
-          s_fir_data_out2 <= x"1";
+          DAC_DATA_IN <= dac_fifo1_dout;
         END IF;
+
+        IF (s_fir_data_out2(1) = '1') THEN
+          DAC_DATA_IN <= dac_fifo2_dout;
+        END IF;
+
+        IF (s_fir_data_out2(2) = '1') THEN
+          DAC_DATA_IN <= dac_fifo3_dout;
+        END IF;
+
+        IF (s_fir_data_out2(3) = '1') THEN
+          DAC_DATA_IN <= dac_fifo4_dout;
+
+          s_fir_data_out2 <= x"1";
+          dac_fifo1_rd_en <= '1';
+          dac_fifo2_rd_en <= '1';
+          dac_fifo3_rd_en <= '1';
+          dac_fifo4_rd_en <= '1';
+        END IF;
+
       END IF;
+      -- END IF;
 
       IF (d_rd_counter = 0) THEN
         d_rd_counter <= (OTHERS => '1');
@@ -701,16 +720,16 @@ BEGIN
     C_DATA_IN_LENGTH => C_DATA_IN_LENGTH,
     C_DATA_OUT_LENGTH => C_DATA_OUT_LENGTH)
   PORT MAP(
-    i_clk => fpga_clk,
-    i_rstb => rst_n,
+    i_clk => FPGA_CLK,
+    i_rstb => RST_N,
     -- coefficient
     i_coeff_0 => C_FIR_COEFS(0),
     i_coeff_1 => C_FIR_COEFS(1),
     i_coeff_2 => C_FIR_COEFS(2),
     i_coeff_3 => C_FIR_COEFS(3),
     -- data input
-    i_data => fir_data_in_Q,
+    i_data => FIR_DATA_Q_i,
     -- filtered data 
-    o_data => fir_data_out
+    o_data => FIR_DATA_o
   );
 END ARCHITECTURE behave;
