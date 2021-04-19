@@ -180,8 +180,9 @@ ARCHITECTURE behave OF FIR_FILTER_TOP_TB IS
   SIGNAL d_strb_Q, d1_strb_Q, d2_strb_Q, d3_strb_Q, d4_strb_Q : STD_LOGIC;
   SIGNAL d1_strb_QQ, d2_strb_QQ, d3_strb_QQ, d4_strb_QQ : STD_LOGIC;
   SIGNAL d1_Q, d2_Q, d3_Q, d4_Q : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  SIGNAL d1_QQ, d2_QQ, d3_QQ, d4_QQ : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
-  SIGNAL d1_QQQ, d2_QQQ, d3_QQQ, d4_QQQ : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL d1_QQ, d2_QQ, d3_QQ : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL d1_QQQ, d2_QQQ : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
+  SIGNAL d1_QQQQ : STD_LOGIC_VECTOR(c_NUM_BITS - 1 DOWNTO 0);
 
   SIGNAL d_out_Q : FIR_FILTER_DATA_TYPE;
   SIGNAL FIR_DATA_o : FIR_FILTER_DATA_TYPE;
@@ -329,10 +330,15 @@ BEGIN
         s_adc_data_Valid <= s_adc_data_Valid(c_NUM_BITS - 2 DOWNTO 0) & b"0";
       END IF;
       -- determine where to load incoming adc data 
-      d1_strb_Q <= s_adc_data_Valid(0) OR s_adc_data_Valid(4) OR s_adc_data_Valid(8) OR s_adc_data_Valid(12);
-      d2_strb_Q <= s_adc_data_Valid(1) OR s_adc_data_Valid(5) OR s_adc_data_Valid(9) OR s_adc_data_Valid(13);
-      d3_strb_Q <= s_adc_data_Valid(2) OR s_adc_data_Valid(6) OR s_adc_data_Valid(10) OR s_adc_data_Valid(14);
-      d4_strb_Q <= s_adc_data_Valid(3) OR s_adc_data_Valid(7) OR s_adc_data_Valid(11) OR s_adc_data_Valid(15);
+      d1_strb_Q <= Valid_in OR s_adc_data_Valid(3) OR s_adc_data_Valid(7) OR s_adc_data_Valid(11);
+      d2_strb_Q <= s_adc_data_Valid(0) OR s_adc_data_Valid(4) OR s_adc_data_Valid(8) OR s_adc_data_Valid(12);
+      d3_strb_Q <= s_adc_data_Valid(1) OR s_adc_data_Valid(5) OR s_adc_data_Valid(9) OR s_adc_data_Valid(13);
+      d4_strb_Q <= s_adc_data_Valid(2) OR s_adc_data_Valid(6) OR s_adc_data_Valid(10) OR s_adc_data_Valid(14);
+      -- -- determine where to load incoming adc data 
+      -- d1_strb_Q <= s_adc_data_Valid(0) OR s_adc_data_Valid(4) OR s_adc_data_Valid(8) OR s_adc_data_Valid(12);
+      -- d2_strb_Q <= s_adc_data_Valid(1) OR s_adc_data_Valid(5) OR s_adc_data_Valid(9) OR s_adc_data_Valid(13);
+      -- d3_strb_Q <= s_adc_data_Valid(2) OR s_adc_data_Valid(6) OR s_adc_data_Valid(10) OR s_adc_data_Valid(14);
+      -- d4_strb_Q <= s_adc_data_Valid(3) OR s_adc_data_Valid(7) OR s_adc_data_Valid(11) OR s_adc_data_Valid(15);
 
       -- TRIGGER FIFO ENABLE LOGIC AFTER LAST VALID REGISTER WR AND HOLD IT HIGH FOR VALID DATA PERIOD
       IF (d4_strb_Q = '1') THEN
@@ -366,15 +372,16 @@ BEGIN
         d4_Q <= fir_data_in;
       END IF;
 
+      -- 4 times buffer first register 
       d1_QQ <= d1_Q;
-      d2_QQ <= d2_Q;
-      d3_QQ <= d3_Q;
-      -- d4_QQ <= d4_Q;
-
       d1_QQQ <= d1_QQ;
+      d1_QQQQ <= d1_QQQ;
+      -- 3 times buffer second register 
+      d2_QQ <= d2_Q;
       d2_QQQ <= d2_QQ;
-      -- d3_QQQ <= d3_QQ;
-      -- d4_QQQ <= d4_QQ;
+      -- 2 times buffer third register 
+      d3_QQ <= d3_Q;
+
     END IF;
   END PROCESS p_adc_data;
 
@@ -401,7 +408,7 @@ BEGIN
 
       -- GENERATE WR STRB FOR FIR FIFO
       IF (d_strb_Q = '1') THEN
-        adc_fifo_din(0) <= d1_QQQ;
+        adc_fifo_din(0) <= d1_QQQQ;
         adc_fifo_wr_en(0) <= '1';
 
         adc_fifo_din(1) <= d2_QQQ;
