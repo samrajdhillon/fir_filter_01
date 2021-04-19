@@ -427,7 +427,7 @@ BEGIN
       d_read_counter_en <= '0';
       s_fir_data_in_Q <= (OTHERS => '0');
       s_fir_data_in_QQ <= (OTHERS => '0');
-      d_out_Q <= ( others =>(OTHERS => '0'));
+      d_out_Q <= (OTHERS => (OTHERS => '0'));
     ELSIF rising_edge(FPGA_CLK) THEN
       --default values 
       adc_fifo_rd_en(0) <= '0';
@@ -471,7 +471,11 @@ BEGIN
     IF (RST_N = '0') THEN
       s_fir_data_out2 <= x"1";
     ELSIF rising_edge(DAC_CLK) THEN
-      s_fir_data_out2 <= s_fir_data_out2(2 DOWNTO 0) & b"0";
+
+      -- synchronize FPGA clock with DAC clk for shift register operation
+      IF (fifo_data_valid = '1') THEN
+        s_fir_data_out2 <= s_fir_data_out2(2 DOWNTO 0) & b"0";
+      END IF;
 
       IF (s_fir_data_out2(0) = '1') THEN
         DAC_DATA_IN <= FIR_DATA_o(0);
