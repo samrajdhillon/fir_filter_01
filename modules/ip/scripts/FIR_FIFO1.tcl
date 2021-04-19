@@ -11,9 +11,9 @@ set_property -dict [list CONFIG.Input_Data_Width {16} \
                          CONFIG.Output_Depth {131072} \
                          CONFIG.Almost_Full_Flag {true} \
                          CONFIG.Data_Count {true} \
-                         CONFIG.Data_Count_Width {17} \
-                         CONFIG.Write_Data_Count_Width {17} \
-                         CONFIG.Read_Data_Count_Width {17} \
+                         CONFIG.Data_Count_Width {16} \
+                         CONFIG.Write_Data_Count_Width {16} \
+                         CONFIG.Read_Data_Count_Width {16} \
                          CONFIG.Full_Threshold_Assert_Value {131070} \
                          CONFIG.Full_Threshold_Negate_Value {131069}] [get_ips $ip_name]
 
